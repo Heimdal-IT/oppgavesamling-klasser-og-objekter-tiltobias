@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Snake</title>
+    <script>
+        
+        
+        
+		var canvas, ctx, head;
+
+
+window.onload = function(){
+    const btnRestart = document.getElementById("btnRestart");
+    
+    
+    canvas = document.getElementById("canvas");
+    ctx = canvas.getContext("2d");
+    
+    var level = 0, 
+        score = 0,
+        map = new Array(20),
+        snake = new Array(3),
+        active = true,
+        speed = 200,
+        direction = 0,
+        drawInt = setInterval(function(){if(active){drawGame()}}, speed - (level * 50)); 
+        
+    let snekLen = 3;
+    
+    for (var i = 0; i < map.length; i++){
+        map[i] = new Array(20);
+    }
+    
+    map = generateFood(map);
+    map = generateSnake(map);
+    
+    
+    drawGame();
+    
+    function drawGame(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        
+        class snakeJoint {
+            constructor(x,y){
+                this.x = x;
+                this.y = y;
+            };
+        };
+        
+        
+        switch(direction){
+            case 0: 
+                if (snake[0].x + 1 > (map.length - 1)) {
+                    showGameOver();
+                } else {
+                    snake.unshift(new snakeJoint(snake[0].x + 1, snake[0].y));
+                };
+                break;
+            case 1: 
+                if (snake[0].x - 1 < 0) {
+                    showGameOver();
+                } else {
+                    snake.unshift(new snakeJoint(snake[0].x - 1, snake[0].y));
+                };
+                break;
+            case 2: 
+                if (snake[0].y - 1 < 0) {
+                    showGameOver();
+                } else {
+                    snake.unshift(new snakeJoint(snake[0].x, snake[0].y - 1));
+                };
+                break;
+            case 3: 
+                if (snake[0].y + 1 > (map[0].length - 1)) {
+                    showGameOver();
+                } else {
+                    snake.unshift(new snakeJoint(snake[0].x, snake[0].y + 1));
+                };
+                break;
+        };
+        
+        //console.log(map[snake[0].x][snake[0].y]);
+        if (map[snake[0].x][snake[0].y] === 1) {
+            snekLen++;
+            score++;
+            if (snekLen > 99) {
+                snekLen = 5;
+                level++;
+            };
+            setTimeout(function(){generateFood(map);}, 1);
+        };
+        
+        
+        for (i = 0; i < snake.length; i++) {
+            if (snake.length > snekLen) {
+                map[snake[snake.length-1].x][snake[snake.length-1].y] = 0;
+                snake.pop();
+            };
+        };
+        
+        map[snake[0].x][snake[0].y] = 2;
+        
+        
+        
+        
+        
+        for(var i = (snake.length - 1); i >= 0; i--){
+            
+            //Snake eat own body
+            if (i !== 0 && snake[0].x === snake[i].x && snake[0].y === snake[i].y) {
+                showGameOver();
+            };
+            
+            
+            
+            
+            /*
+                Liste over ting som må gjøres her:
+                    1. hvis for-løkka er på hodet så må du bestemme hvilken retning den skal forflytte seg, dette
+                        bør gjøres ved hjelp av en switch(direction), som vist under. Denne er ikke fullført,
+                        dette er din oppgave.
+
+                 switch(direction){
+                    case 0: // right
+                        break;
+                    case 1: // left
+                        break;
+                    case 2: // up
+                        break;
+                    case 3: // down
+                        break;
+                 }
+
+                    2. Gjøre en sjekk som kaller på showGameOver()
+                    3. Gjøre en sjekk på om du spiser mat, isåfall må du gi poeng, generere mat og forlenge slangen.
+                        Dersom poengsummen er 100, så skal du øke i level.
+                    4. Lage ne sjekk som sjekker om du prøver å spise deg selv
+                    5. Flytte slangen fremover
+
+             */
+        }
+        
+        
+        // Tegner spillbrettet
+        drawMain();
+        
+        
+        // Tegner slangen
+        for(var x = 0; x < map.length; x++){
+            for(var y = 0; y < map[0].length; y++){
+                if(map[x][y]===1){
+                    ctx.fillStyle = "red";
+                    ctx.fillRect(x*10,y*10+20,10,10);
+                } else if(map[x][y]===2){
+                    ctx.fillStyle = "green";
+                    ctx.fillRect(x*10, y*10 + 20, 10,10);
+                    
+                } 
+            }
+        }
+        
+        if(active){
+            // call drawGame;
+            drawInt;
+        };
+            
+    }
+
+
+    function drawMain(){
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "black";
+        ctx.strokeRect(2,20, canvas.width - 4, canvas.height -  24);
+        
+        
+        ctx.font = "12px sans-serif";
+        ctx.fillText("Score: " + score + " Level: " + level, 2, 12);
+        
+    };
+
+    // Genererer mat på tilfeldig sted
+    function generateFood(map){
+        var rndX = Math.round(Math.random()*19),
+            rndY = Math.round(Math.random()*19);
+        
+        while(map[rndX][rndY] === 2){
+            rndX = Math.round(Math.random()*19);
+            rndY = Math.round(Math.random()*19);
+        };
+        
+        map[rndX][rndY] = 1;
+        return map;
+    };
+
+
+    // Genererer slangen på tilfeldig sted når spillet starter
+    function generateSnake(map){
+        var rndX = Math.round(Math.random()*19),
+            rndY = Math.round(Math.random()*19);
+        
+        while((rndX - snake.length)< 0){
+            rndX = Math.round(Math.random()*19);
+        }
+        
+        
+        for(var i = 0; i < snake.length; i++){
+            snake[i] = {
+                x: rndX - i,
+                y: rndY
+            };
+            map[rndX-i][rndY] = 2;
+        }
+        
+        return map;        
+    };
+    
+
+    function showGameOver(){
+        /*
+            Her skal du skrive kode som stopper spillet og viser: Game Over
+         */
+        active = false;
+        
+        setTimeout(function(){
+            ctx.fillStyle = "rgba(0,0,0,0.5)";
+            ctx.fillRect(12,92,180,60);
+            ctx.font = "30px Arial";
+            ctx.fillStyle = "#fff";
+            ctx.fillText("Game Over", 25, 132);
+        }, 100);
+        btnRestart.style.display = "inline-block";
+    };
+    
+    const restartGame = function() {
+        active = true;
+        snekLen = 3;
+        level = 0;
+        score = 0;
+        for(i=0;i<map.length;i++){
+            map[i] = new Array(20);
+        };
+        generateSnake(map);
+        generateFood(map);
+        btnRestart.style.display = "none";
+    };
+    
+    
+    window.addEventListener("keydown",function(e){
+        switch(e.keyCode){
+        case 39: 
+            if (direction !== 1) {
+                direction = 0;
+            };
+            break;
+        case 37: 
+            if(direction !== 0) {
+                direction = 1;
+            };
+            break;
+        case 38: 
+            if(direction !== 3) {
+                direction = 2;
+            };
+            break;
+        case 40: 
+            if(direction !== 2) {
+                direction = 3;
+            };
+            break;
+        };
+    });
+    btnRestart.addEventListener("click", restartGame);
+};
+
+	</script>
+	<style>
+        body {
+            margin: 0;
+        }
+        main {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        #cont {
+            position: relative;
+        }
+        
+        #btnRestart {
+            display: none;
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translate(-50%);
+        }
+        
+    </style>
+</head>
+<body>
+    <main>
+        <div id="cont">
+            <canvas id="canvas" width="204" height="224"></canvas>
+            <button id="btnRestart">Restart</button>
+        </div>
+    </main>
+</body>
+</html>
