@@ -235,6 +235,8 @@ window.onload = function(){
     const restartGame = function() {
         active = true;
         snekLen = 3;
+        snake = new Array(3);
+        direction = 0;
         level = 0;
         score = 0;
         for(i=0;i<map.length;i++){
@@ -246,6 +248,7 @@ window.onload = function(){
     };
     
     
+    let prevDirection = direction;
     window.addEventListener("keydown",function(e){
         switch(e.keyCode){
         case 39: 
@@ -272,7 +275,7 @@ window.onload = function(){
     });
     btnRestart.addEventListener("click", restartGame);
 };
-
+        
 	</script>
 	<style>
         body {
@@ -287,6 +290,7 @@ window.onload = function(){
         }
         #cont {
             position: relative;
+            margin-bottom: 50px;
         }
         
         #btnRestart {
@@ -297,14 +301,92 @@ window.onload = function(){
             transform: translate(-50%);
         }
         
+        
+        #colorCont {
+            padding: 10px;
+        }
+        #colorCont label {
+            display: block;
+            position: relative;
+        }
+        .rgbLabel {
+            position: absolute;
+            display: inline-block;
+            left: -3em;
+        }
+        .rgbValue {
+            position: absolute;
+            display: inline-block;
+            right: -2em;
+        }
+        #hexBox {
+            text-align: center;
+        }
+        
     </style>
 </head>
 <body>
-    <main>
+    <main id="main">
         <div id="cont">
             <canvas id="canvas" width="204" height="224"></canvas>
             <button id="btnRestart">Restart</button>
         </div>
+        <div id="colorCont">
+            <label for="inpR">
+                <span class="rgbLabel">Red</span>
+                <input id="inpR" type="range" min="0" max="255" value="255">
+                <span class="rgbValue">255</span>
+            </label>
+            <label for="inpG">
+                <span class="rgbLabel">Green</span>
+                <input id="inpG" type="range" min="0" max="255" value="255">
+                <span class="rgbValue">255</span>
+            </label>
+            <label for="inpB">
+                <span class="rgbLabel">Blue</span>
+                <input id="inpB" type="range" min="0" max="255" value="255">
+                <span class="rgbValue">255</span>
+            </label>
+            <div id="hexBox">#ffffff</div>
+        </div>
     </main>
+<script>
+
+    //---------------CHANGE BACKGROUND COLOR----------------------------------
+
+    const main = document.getElementById("main");
+    const inpR = document.getElementById("inpR");
+    const inpG = document.getElementById("inpG");
+    const inpB = document.getElementById("inpB");
+    const inpRGBs = document.querySelectorAll("#colorCont label input");
+    const hexBox = document.getElementById("hexBox");
+
+    function changeColor() {
+        let red = +inpR.value;
+        let green = +inpG.value;
+        let blue = +inpB.value;
+
+        main.style.backgroundColor = `rgba( ${red}, ${green}, ${blue},1)`;
+        
+        inpR.nextElementSibling.innerHTML = red;
+        inpG.nextElementSibling.innerHTML = green;
+        inpB.nextElementSibling.innerHTML = blue;
+        
+        hexBox.innerHTML = "#" + hexify(red) + hexify(green) + hexify(blue);
+        
+        function hexify(num) {
+            let hex = (+num).toString(16);
+            if (hex.length < 2) {
+                return  "0" + hex;
+            } else {
+                return hex;
+            };
+        };
+    };
+
+    inpRGBs.forEach(function(e){e.addEventListener("input", changeColor)});
+
+    
+</script>
 </body>
 </html>
